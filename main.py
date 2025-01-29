@@ -80,7 +80,7 @@ async def analyze_image(file: UploadFile = File(...)):
     # Detect damages using YOLO
     results = damage_model(image)
 
-    # Process YOLO detections (WITHOUT NMS)
+    # Process YOLO detections
     damages = []
     for box in results[0].boxes:
         x1, y1, x2, y2 = map(int, box.xyxy[0])  # Bounding box coordinates
