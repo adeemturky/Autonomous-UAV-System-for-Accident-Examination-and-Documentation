@@ -7,7 +7,7 @@ import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
 # Load YOLO model (replace the path with your model's location)
-damage_model = YOLO('C:\\Users\\PCD\\Desktop\\f11\\FastAPI\\best.pt')
+damage_model = YOLO('/Users/adoomy/GP2_Final/Auto_final/best.pt')
 damage_class_names = damage_model.names
 
 # Load Llama3.1 (Meta's Llama-3.1-8B-Instruct model)
@@ -19,47 +19,6 @@ model = AutoModelForCausalLM.from_pretrained(
 ).to("cuda")  # Ensure the model runs on GPU
 
 app = FastAPI()
-
-def apply_nms(results, conf_threshold=0.5, iou_threshold=0.4):
-    """
-    Post-process YOLO's detection results using Non-Maximum Suppression (NMS).
-
-    Args:
-        results: YOLO output (list of bounding boxes with confidence scores and class indices).
-        conf_threshold: Confidence threshold to filter weak detections.
-        iou_threshold: IoU threshold for NMS to remove overlapping boxes.
-
-    Returns:
-        List of filtered detections after applying NMS.
-    """
-    boxes = []
-    confidences = []
-    class_ids = []
-
-    # Extract detection data
-    for box in results[0].boxes:  # Assuming results[0] contains YOLO detections
-        x1, y1, x2, y2 = map(int, box.xyxy[0])  # Bounding box coordinates
-        conf = float(box.conf[0])              # Confidence score
-        cls = int(box.cls[0])                  # Class index
-
-        if conf > conf_threshold:  # Filter weak detections
-            boxes.append([x1, y1, x2 - x1, y2 - y1])  # Convert to (x, y, w, h)
-            confidences.append(conf)
-            class_ids.append(cls)
-
-    # Apply NMS
-    indices = cv2.dnn.NMSBoxes(boxes, confidences, conf_threshold, iou_threshold)
-
-    filtered_detections = []
-    if len(indices) > 0:
-        for i in indices.flatten():
-            filtered_detections.append({
-                "bounding_box": boxes[i],
-                "confidence": confidences[i],
-                "class_name": damage_class_names[class_ids[i]]
-            })
-
-    return filtered_detections
 
 # Pre-tokenize the static part of the prompt
 static_prompt = """
@@ -121,8 +80,18 @@ async def analyze_image(file: UploadFile = File(...)):
     # Detect damages using YOLO
     results = damage_model(image)
 
-    # Post-process YOLO detections using NMS
-    damages = apply_nms(results, conf_threshold=0.5, iou_threshold=0.4)
+    # Process YOLO detections (WITHOUT NMS)
+    damages = []
+    for box in results[0].boxes:
+        x1, y1, x2, y2 = map(int, box.xyxy[0])  # Bounding box coordinates
+        conf = float(box.conf[0])              # Confidence score
+        cls = int(box.cls[0])                  # Class index
+
+        damages.append({
+            "bounding_box": [x1, y1, x2 - x1, y2 - y1],  # Convert to (x, y, w, h)
+            "confidence": conf,
+            "class_name": damage_class_names[cls]
+        })
 
     # Add detected damages to the prompt
     dynamic_prompt = ""
@@ -139,10 +108,9 @@ async def analyze_image(file: UploadFile = File(...)):
     # Generate text with the LLM
     output = model.generate(
         **inputs,
-        max_length=600, 
+        max_length=800, 
         no_repeat_ngram_size=3,  # Avoid repetitive sentences
         early_stopping=True,
-         temperature =0.1,
     )
 
     # Decode the generated text
