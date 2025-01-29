@@ -8,3 +8,6 @@ https://app.roboflow.com/adeemvlm/car_dent_scratch_detection-1-auyvn/1
 # Experiment results
 <img width="1104" alt="Screenshot 2025-01-20 at 1 16 10 AM" src="https://github.com/user-attachments/assets/764e80d0-2b4c-461f-b812-f4a4ddc897db" />
 
+
+# Enhanced model results
+![IMG_5963](https://github.com/user-attachments/assets/b717f70c-a509-4286-bdce-69c18a595f58)
