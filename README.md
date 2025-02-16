@@ -1,10 +1,10 @@
+![gitback](https://github.com/user-attachments/assets/3d60c9a3-0c99-4040-8a5f-1ddbc7ee71ab)
+
 # Autonomous-UAV-System-for-Accident-Examination-and-Documentation
 
 # Project Description
 In the first stage, YOLO detects and classifies damages, providing their coordinates for accurate identification.
 The second stage converts these results into a clear, human-readable format. A Large Language Model (LLM) is used to generate a detailed report describing the damages and their characteristics.
-
-![gitback](https://github.com/user-attachments/assets/3d60c9a3-0c99-4040-8a5f-1ddbc7ee71ab)
 
 # link to our preprocessed and used dataset:
 https://app.roboflow.com/adeemvlm/car_dent_scratch_detection-1-auyvn/1
